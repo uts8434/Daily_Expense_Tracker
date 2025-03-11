@@ -25,6 +25,10 @@ function Forgotpass() {
     }
   };
 
+  const hadelcancel=()=>{
+    navigate("/")
+  }
+
   // Step 2: Update password
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
@@ -55,9 +59,15 @@ function Forgotpass() {
             placeholder="Enter your email"
             required
           />
+          
+          <div className="flex gap-4">
           <button type="submit" className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 rounded-md transition-all">
             Verify Email
           </button>
+          <button type="submit" onClick={hadelcancel} className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 rounded-md transition-all">
+            Cancel
+          </button>
+          </div>
         </form>
       ) : (
         <form onSubmit={handleUpdatePassword} className="space-y-4 bg-gray-800 p-6 rounded-md shadow-lg w-80">
@@ -69,9 +79,16 @@ function Forgotpass() {
             placeholder="Enter new password"
             required
           />
+
+          <div className="flex gap-4">
           <button type="submit" className="w-full py-2 bg-green-500 hover:bg-green-600 rounded-md transition-all">
             Update Password
           </button>
+          <button type="submit" onClick={hadelcancel} className="w-full py-2 bg-green-500 hover:bg-green-600 rounded-md transition-all">
+            Cancel
+          </button>
+
+          </div>
         </form>
       )}
 
