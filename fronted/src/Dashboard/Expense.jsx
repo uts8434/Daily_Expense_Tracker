@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+
+import { useSelector } from "react-redux";
 const Expense = () => {
   const [expenses, setExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [loading, setLoading] = useState(true);
-  const uid = localStorage.getItem("uid"); // Change this to a dynamic user ID
+  const uid = useSelector((state)=>state.ids.uid); // Change this to a dynamic user ID
 
   // Fix state initialization
   const [monthlyIncome, setMonthlyIncome] = useState(0);

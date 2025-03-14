@@ -1,48 +1,93 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { faWallet } from "@fortawesome/free-solid-svg-icons";
-import { useSelector } from "react-redux";
 import { FaBars, FaTimes } from "react-icons/fa";
+
+import { useSelector,useDispatch } from "react-redux";
+
+import { setUserName } from "../Redux/Slice/NameSlice";
+import { setToken } from "../Redux/Slice/TokenSlice";
+import { setuserid } from "../Redux/Slice/id";
+import { settotalamount,setfetchAmount } from "../Redux/Slice/Amountslice";
+import { setLastDepositDate } from "../Redux/Slice/Dateslice";
+
+
+
+
 
 function Header() {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [token, setToken] = useState(null);
-  const [fetch_amount, setfetchamount] = useState(0);
-  const [isLogin, setIsLogin] = useState("false");
-  // const amount = useSelector((state) => state.wallet.amount); // Get amount from Redux
-  const uid = localStorage.getItem("uid");
-  const [totalamount, settotalamount] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const dispatch =useDispatch();
 
+  // const [totalamount, settotalamount] = useState([]);
+    // const [fetch_amount, setfetchamount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+
+  
+  
+  const storedToken=useSelector((state)=>state.token.token);
+  //  const uid = useSelector((state)=>state.ids.uid);
+   const storedName = useSelector((state)=> state.username.user);
+   const  fetch_amount= useSelector((state)=>state.amount.fetchamount);
+   const totalamount = useSelector((state)=>state.amount.totalamount)
+   
+
+useEffect(() => {
+  const storedToken = localStorage.getItem("token");
+  const storedUserId = localStorage.getItem("uid");
+  const storedname = localStorage.getItem("name");
+  const storedleftaount=localStorage.getItem("LeftAmount")
+  if (storedToken && storedUserId && storedname&& storedleftaount) {
+    dispatch(setToken(storedToken));
+    dispatch(setuserid(storedUserId));
+    dispatch(setUserName(storedname));
+    
+  }
+}, [dispatch]);
+
+const uid = useSelector((state)=>state.ids.uid);
   useEffect(() => {
+    
     const fetchdata = async () => {
+   
+      if (!uid) return ;
       try {
         const response = await axios.get(`/api/getamount?uid=${uid}`);
-        console.log("Fetched amount:", response.data.amount);
-        setfetchamount(response.data.amount);
+        console.log("depositdate",response.data.depositdate)
+
+        dispatch(setfetchAmount(response.data.amount));
+        dispatch(settotalamount(response.data.totalamount));
+        dispatch(setLastDepositDate(response.data.depositdate));
+        
+        localStorage.setItem("LeftAmount",response.data.amount);
+     
+        // setfetchamount(response.data.amount);
+        // settotalamount(response.data.totalamount);
+
         console.log("total amount" + response.data.totalamount);
-        settotalamount(response.data.totalamount);
+        console.log("Fetched amount:", response.data.amount);
+        
       } catch (error) {
         console.error("Error fetching amount:", error);
-        setfetchamount(0); // ✅ Set amount to 0 in case of error
+    
+        dispatch(setfetchAmount(0));
+        // setfetchamount(0); //  Set amount to 0 in case of error
       }
     };
     fetchdata();
-  }, [uid]);
+  }, [uid,dispatch]);
 
-  const [showAlert, setShowAlert] = useState(false);
+ 
 
   useEffect(() => {
     if (fetch_amount <= totalamount * 0.1) {
       setShowAlert(true);
-
-      // Hide alert after 3 seconds
       const timer = setTimeout(() => {
         setShowAlert(false);
       }, 5000);
@@ -53,31 +98,22 @@ function Header() {
     }
   }, [fetch_amount, totalamount]); // Re-run effect when fetch_amount or totalamount changes
 
-  useEffect(() => {
-    let storedToken = localStorage.getItem("token");
-    let storedName = localStorage.getItem("name");
+ 
+  
 
-    if (!storedToken) {
-      navigate("/");
-    } else {
-      setToken(storedToken);
-    }
-
-    if (storedName) {
-      setName(storedName);
-    }
-  }, []);
-  const handleNavClick = () => {
-    setIsOpen(false);
-  };
+  
 
   // Logout function
   const handleLogout = () => {
+    dispatch(setToken(null));
+    dispatch(setUserName("Guest"));
+    dispatch(setuserid(null));
     localStorage.removeItem("token");
-    localStorage.removeItem("name");
+    // localStorage.removeItem("name");
     localStorage.removeItem("uid");
-    setToken(null);
-    setName("");
+    // setToken(null);
+    // setName("");
+
     alert("Logged out successfully!");
     navigate("/");
   };
@@ -90,7 +126,7 @@ function Header() {
     <div className="bg-green-900 px-6 md:px-16 py-4 flex justify-between items-center">
       <div className="w-full flex items-center justify-between px-6 py-3 text-white">
         {/* Left Side - Navigation */}
-        {token && (
+        {storedToken && (
           <div className="flex items-center gap-8">
             <ul className="flex gap-4 font-semibold text-lg">
               <li>
@@ -109,7 +145,7 @@ function Header() {
             </ul>
           </div>
         )}
-        {!token && (
+        {!storedToken && (
         <div className="flex items-center gap-8">
           <ul className="flex gap-4 font-semibold text-lg">
             <li>
@@ -120,7 +156,7 @@ function Header() {
         )}
 
         {/* Mobile Menu Button */}
-        {token && (
+        {storedToken && (
           <button
             className="md:hidden text-white text-2xl"
             onClick={() => setIsOpen(!isOpen)}
@@ -140,12 +176,12 @@ function Header() {
               />
             </div>
             <p className="text-gray-100 font-medium text-lg">
-              {name || "Guest"}
+              {storedName || "Guest"}
             </p>
           </nav>
 
           {/* Wallet Button */}
-          {token && (
+          {storedToken && (
             <nav>
               <form onSubmit={handleSubmit}>
                 <button
@@ -159,7 +195,7 @@ function Header() {
           )}
 
           {/* Current Amount */}
-          {token && (
+          {storedToken && (
             <nav>
               <div
                 className={`font-bold ${
@@ -176,7 +212,7 @@ function Header() {
           )}
 
           {/* Low Balance Warning */}
-          {token && showAlert && (
+          {storedToken && showAlert && (
             <nav>
               <div className="p-2 text-white bg-red-500 rounded-md animate-pulse">
                 ⚠️ Warning: Your balance is running low!
@@ -185,7 +221,7 @@ function Header() {
           )}
 
           {/* Logout Button */}
-          {token && (
+          {storedToken && (
             <nav>
               <button
                 className="bg-red-500 text-white font-medium py-2 px-5 rounded-lg shadow-lg hover:bg-red-900 transition-all duration-300 hover:scale-105"
@@ -218,7 +254,7 @@ function Header() {
         >
           <FaTimes />
         </button>
-        {token && (
+        {storedToken && (
           <>
             {/* Profile Section */}
             <nav className="flex items-center gap-3 border-b border-gray-600 pb-3">
@@ -234,7 +270,7 @@ function Header() {
         )}
 
         {/* Current Amount & Alert */}
-        {token && (
+        {storedToken && (
           <nav className="w-full bg-gray-800 text-white py-4 text-center rounded-md shadow-lg">
             <div
               className={`font-bold text-lg ${
@@ -257,7 +293,7 @@ function Header() {
         )}
 
         {/* Wallet Button */}
-        {token && (
+        {storedToken && (
           <nav className="w-full">
             <form onSubmit={handleSubmit} className="w-full">
               <button
@@ -273,7 +309,7 @@ function Header() {
 
         {/* Navigation Links */}
         <nav className="flex flex-col items-center text-lg font-semibold">
-          {token && (
+          {storedToken && (
             <ul className="w-full flex flex-col gap-4 text-center">
               <li className="py-2 w-full bg-gray-700 rounded-md hover:bg-gray-600">
                 <Link
@@ -289,7 +325,7 @@ function Header() {
         </nav>
 
         {/* Logout Button */}
-        {token && (
+        {storedToken && (
           <nav className="flex justify-center">
             <button
               className="bg-red-500 text-white font-medium py-2 px-6 rounded-lg shadow-lg hover:bg-red-700"

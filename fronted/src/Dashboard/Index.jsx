@@ -2,6 +2,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 function Index() {
   const [expenseamount, setexpenseamount] = useState("");
@@ -14,7 +15,7 @@ function Index() {
   const [expense, setexpense] = useState([]);
   const [totalAomunt, setTotalamount] = useState([]);
 
-  const uid = localStorage.getItem("uid");
+  const uid = useSelector((state)=>state.ids.uid);
 
   useEffect(() => {
     const fetchexpenses = async () => {

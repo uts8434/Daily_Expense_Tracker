@@ -1,44 +1,41 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { setAmount } from "../Redux/walletSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+import { useDispatch, useSelector } from "react-redux";
+import { settotalamount } from "../Redux/Slice/Amountslice";
+
+
 function AddWallet() {
   const navigate = useNavigate();
-  const [amount, setLocalAmount] = useState("");
-  const [currentBalance, setCurrentBalance] = useState(0);
-  const [lastDepositDate, setLastDepositDate] = useState(null);
-  const [lastDepositAmount, setLastDepositAmount] = useState(0);
-  const [error, setError] = useState("");
   const dispatch = useDispatch();
-  const uid = localStorage.getItem("uid");
+
+  const uid =useSelector((state)=>state.ids.uid);
+  const amount =useSelector((state)=>state.amount.totalamount);
+  const currentBalance= useSelector((state)=>state.amount.fetchamount);
+  const lastDepositDate = useSelector((state)=>state.lastdepositdate.lastDepositDate);
+  const lastDepositAmount = useSelector((state)=>state.amount.totalamount);
+
+
+
+  const [Insertedamount, setInsertedAmount] = useState("");
+  // const [currentBalance, setCurrentBalance] = useState(0);
+  // const [lastDepositDate, setLastDepositDate] = useState(null);
+  // const [lastDepositAmount, setLastDepositAmount] = useState(0);
+  const [error, setError] = useState("");
+  
+  // const uid = localStorage.getItem("uid");
+  
 
   const gotohome=()=>{
     navigate("/Dashboard");
   }
 
-  useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        const { data } = await axios.get(`/api/getamount?uid=${uid}`);
-        setCurrentBalance(data.amount);
-        setLastDepositDate(data.lastDepositDate);
-        setLastDepositAmount(data.lastDepositAmount || 0);
-      } catch (err) {
-        console.error("Error fetching balance:", err);
-        setCurrentBalance(0);
-        setLastDepositDate(null);
-        setLastDepositAmount(0);
-      }
-    };
-    fetchBalance();
-  }, [uid]);
-
+  
   const handleSave = async (e) => {
     e.preventDefault();
     setError("");
-    const enteredAmount = parseFloat(amount);
+    const enteredAmount = parseFloat(Insertedamount);
     if (enteredAmount <= 0) {
       setError("Amount must be greater than zero.");
       return;
@@ -56,7 +53,7 @@ function AddWallet() {
     try {
       const { data } = await axios.post("/api/updatelimit", { amount: enteredAmount, uid });
       alert(data.message);
-      dispatch(setAmount(enteredAmount));
+      dispatch(settotalamount(enteredAmount));
       navigate("/Dashboard");
     } catch (err) {
       console.error("Error adding balance:", err.response?.data?.error);
@@ -73,10 +70,10 @@ function AddWallet() {
 
         {error && <p className="text-red-600 text-center">{error}</p>}
 
-        <p className="text-center text-gray-600 mb-2">Current Wallet Balance: ₹{currentBalance}</p>
+        <p className="text-center text-gray-600 mb-2">Last Deposit Balance: ₹{lastDepositAmount}</p>
         {lastDepositDate && (
           <p className="text-center text-gray-500 text-sm mb-2">
-            Last Deposit: {new Date(lastDepositDate).toLocaleDateString()} (₹{lastDepositAmount})
+            Last Deposit: {new Date(lastDepositDate).toLocaleDateString()}
           </p>
         )}
 
@@ -86,8 +83,8 @@ function AddWallet() {
             <input
               type="number"
               min="0"
-              value={amount}
-              onChange={(e) => setLocalAmount(e.target.value)}
+              value={Insertedamount}
+              onChange={(e) => setInsertedAmount(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               placeholder="Enter amount"
               required

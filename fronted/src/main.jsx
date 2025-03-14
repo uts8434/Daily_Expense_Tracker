@@ -9,7 +9,7 @@ import AddWallet from './assets/AddWallet.jsx'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
 import Layout from './assets/Layout.jsx'
 import {Provider} from "react-redux"
-import store from './Redux/store.js'
+import store from './Redux/Store/store.js'
 import Forgotpass from './assets/Forgotpass.jsx'
 
 
