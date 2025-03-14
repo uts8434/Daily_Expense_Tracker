@@ -32,7 +32,10 @@ function Login() {
     }
 
     try {
+      console.log("trying calling");
+      console.log("emai",email,"pass",pass);
       const { data } = await axios.post("/api/login", { email, pass });
+      console.log("ok right now");
       dispatch(setToken(data.token));
       dispatch(setuserid(data.uid));
       dispatch(setUserName(data.name));
