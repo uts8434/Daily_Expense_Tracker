@@ -31,7 +31,7 @@ router.get("/getamount", async (req, res) => {
 
     try {
         const [rows] = await db.promise().query(
-            "SELECT amount,totalamount FROM amounts WHERE uid = ? ORDER BY created_at DESC LIMIT 1",
+            "SELECT amount,totalamount,created_at FROM amounts WHERE uid = ? ORDER BY created_at DESC LIMIT 1",
             [uid]
         );
 
@@ -43,7 +43,7 @@ router.get("/getamount", async (req, res) => {
             return res.status(200).json({ amount: 0 });  // ✅ No error, just amount = 0
         }
 
-        return res.status(200).json({ amount: rows[0].amount,totalamount:rows[0].totalamount });
+        return res.status(200).json({ amount: rows[0].amount,totalamount:rows[0].totalamount ,depositdate:rows[0].created_at});
 
     } catch (error) {
         console.error("Database error:", error.message);
